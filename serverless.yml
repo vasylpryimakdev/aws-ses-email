@@ -7,7 +7,20 @@ provider:
   name: aws
   runtime: nodejs24.x
   architecture: arm64
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - "ses:*"
+          Resource:
+            - "*"
 
 functions:
-  hello:
-    handler: handler.hello
+  create:
+    handler: handler.createContact
+    events:
+      - http:
+          path: /contact-us
+          method: post
+          cors: true
