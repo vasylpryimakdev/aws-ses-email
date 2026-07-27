@@ -1,68 +1,100 @@
-<!--
-title: 'AWS NodeJS Example'
-description: 'This template demonstrates how to deploy a simple NodeJS function running on AWS Lambda using the Serverless Framework.'
-layout: Doc
-framework: v4
-platform: AWS
-language: nodeJS
-priority: 1
-authorLink: 'https://github.com/serverless'
-authorName: 'Serverless, Inc.'
-authorAvatar: 'https://avatars1.githubusercontent.com/u/13742415?s=200&v=4'
--->
+# AWS SES Email Sender
 
-# Serverless Framework AWS NodeJS Example
+A minimal Serverless Framework project that deploys an AWS Lambda function to send email through Amazon SES, plus a simple Next.js client for submitting contact messages.
 
-This template demonstrates how to deploy a simple NodeJS function running on AWS Lambda using the Serverless Framework. The deployed function does not include any event definitions or any kind of persistence (database). For more advanced configurations check out the [examples repo](https://github.com/serverless/examples/) which include use cases like API endpoints, workers triggered by SQS, persistence with DynamoDB, and scheduled tasks. For details about configuration of specific events, please refer to our [documentation](https://www.serverless.com/framework/docs/providers/aws/events/).
+## Project overview
 
-## Usage
+- `handler.js`: AWS Lambda handler using `@aws-sdk/client-ses`.
+- `serverless.yml`: Serverless Framework service configuration and HTTP POST endpoint for `/contact-us`.
+- `client/`: Next.js application with a contact form.
 
-### Deployment
+The Lambda function accepts a JSON POST request and sends an email using SES. The client app submits the form data to the deployed API.
 
-In order to deploy the example, you need to run the following command:
+## Features
 
+- SES email sending with Node.js 24.x runtime
+- HTTP POST API endpoint: `/contact-us`
+- CORS support enabled for the Lambda response
+- Next.js client form for `to`, `from`, `subject`, and `message`
+
+## Requirements
+
+- Node.js (recommended 18+ or compatible with Next.js and AWS Lambda Node.js 24.x)
+- npm
+- Serverless Framework CLI installed
+- AWS credentials configured locally
+- SES sender/recipient addresses verified if your SES account is in sandbox mode
+
+## Setup
+
+1. Install root dependencies:
+
+```bash
+npm install
 ```
+
+2. Install client dependencies:
+
+```bash
+cd client
+npm install
+```
+
+3. Configure AWS credentials and default region, for example with `aws configure`.
+
+## Deploy
+
+From the project root, deploy the service with Serverless Framework:
+
+```bash
 serverless deploy
 ```
 
-After running deploy, you should see output similar to:
+After deployment, the HTTP endpoint will be available through API Gateway. The function is configured in `serverless.yml` as `createContact` and uses the `handler.createContact` export.
 
-```
-Deploying "aws-node" to stage "dev" (us-east-1)
+## Local development
 
-✔ Service deployed to stack aws-node-dev (90s)
+Run the client app locally:
 
-functions:
-  hello: aws-node-dev-hello (1.5 kB)
-```
-
-### Invocation
-
-After successful deployment, you can invoke the deployed function by using the following command:
-
-```
-serverless invoke --function hello
+```bash
+cd client
+npm run dev
 ```
 
-Which should result in response similar to the following:
+Then open `http://localhost:3000` in your browser.
 
-```json
-{
-  "statusCode": 200,
-  "body": "{\"message\":\"Go Serverless v4.0! Your function executed successfully!\"}"
-}
-```
+> Note: `client/pages/index.js` currently uses a hard-coded API URL. Update that URL to the deployed API endpoint or wire it to an environment variable for local testing.
 
-### Local development
+## Usage
 
-The easiest way to develop and test your function is to use the Serverless Framework's `dev` command:
+Submit the contact form with:
 
-```
-serverless dev
-```
+- `to`: recipient email address
+- `from`: sender email address
+- `subject`: email subject
+- `message`: email body text
 
-This will start a local emulator of AWS Lambda and tunnel your requests to and from AWS Lambda, allowing you to interact with your function as if it were running in the cloud.
+The Lambda handler will send the email via SES and return a JSON response indicating success or failure.
 
-Now you can invoke the function as before, but this time the function will be executed locally. Now you can develop your function locally, invoke it, and see the results immediately without having to re-deploy.
+## SES and AWS notes
 
-When you are done developing, don't forget to run `serverless deploy` to deploy the function to the cloud.
+- SES may require sender and recipient verification in sandbox mode.
+- The function currently requests `ses:*` permission in `serverless.yml`.
+- The Lambda runtime is `nodejs24.x` and architecture is `arm64`.
+
+## File structure
+
+- `handler.js` - Lambda function logic
+- `serverless.yml` - Service definition and API event config
+- `client/package.json` - Next.js client dependencies and scripts
+- `client/pages/index.js` - Contact form UI and fetch call
+
+## Troubleshooting
+
+- If email sending fails, verify SES configuration and sandbox restrictions.
+- Check CloudWatch logs for Lambda errors.
+- Make sure the API endpoint in the client code points to the deployed API Gateway URL.
+
+## License
+
+MIT
