@@ -1,0 +1,13 @@
+# "org" ensures this Service is used with the correct Serverless Framework Access Key.
+org: vasylpryimakawscourse
+# "service" is the name of this project. This will also be added to your AWS resource names.
+service: aws-ses-email
+
+provider:
+  name: aws
+  runtime: nodejs24.x
+  architecture: arm64
+
+functions:
+  hello:
+    handler: handler.hello
